@@ -1,0 +1,42 @@
+{% extends 'base.jinja' %}
+{% from '_helpers.jinja' import render_pagination with context %}
+
+{% block head %}<link href="{{ STATIC }}{{ config['TEMPLATE'] }}/css/state.css" rel="stylesheet" type="text/css">{% endblock %}
+{% block title %}{{ _('Shipments') }}. {{ _('Page') }} {{ shipments.page }}{% endblock %}
+{% block metadescription %}{{ _('Shipments') }} - {{ config['TITLE'] }}. {{ _('Page') }} {{ shipments.page }}{% endblock %}
+
+{% block main %}
+{% set bread_crumbs = [(url_for('nereid.website.home'), _('Home')), (url_for('stock.shipment.out.render_list'), _('Shipments'))] %}
+{% set shipment_state = {'draft': _('Draft'), 'done': _('Done'), 'cancel': _('Canceled'), 'assigned': _('Assigned'), 'packed': _('Packed'), 'waiting': _('Waiting')} %}
+{% include 'nav.jinja' %}
+<div class="row">
+    <div class="span12 page-header">
+        <h1>{{ _('Shipments') }}</h1>
+    </div>
+    <div class="span12">
+        {% if shipments %}
+            <table class="table table-striped">
+            <tbody>
+            <tr class="blacky">
+              <th>{{ _('Code') }}</th>
+              <th>{{ _('Date') }}</th>
+              <th>{{ _('State') }}</th>
+              <th>{{ _('Details') }}</th>
+            </tr>
+            {% for shipment in shipments %}
+            <tr>
+              <td>{% if shipment.reference %}<a href="{{ url_for('stock.shipment.out.render', uri=shipment.id) }}">{{ shipment.reference }}</a>{% endif %}</td>
+              <td>{{ shipment.effective_date|dateformat }}</td>
+              <td><span class="state state-small state-{{ shipment.state }}">{{ shipment_state[shipment.state] }}</span></td>
+              <td><a href="{{ url_for('stock.shipment.out.render', uri=shipment.id) }}">{{ _('View Details') }}</a></td>
+            </tr>
+            {% endfor %}
+            </tbody>
+            </table>
+            {% if shipments.pages > 1 %}{{ render_pagination(shipments, None, 'stock.shipment.out.render_list') }}{% endif %}
+        {% else %}
+            <div class="alert">{{ _('Not shipments are available') }}.</div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
